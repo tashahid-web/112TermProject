@@ -2,5 +2,12 @@
     "python-envs.defaultEnvManager": "ms-python.python:venv",
     "python.linting.enabled": false,
     "python.analysis.diagnosticMode": "off",
-    "python.analysis.typeCheckingMode": "off"
+    "python.analysis.typeCheckingMode": "off",
+    "python-envs.pythonProjects": [
+        {
+            "path": ".",
+            "envManager": "ms-python.python:conda",
+            "packageManager": "ms-python.python:conda"
+        }
+    ]
 }
