@@ -14,7 +14,8 @@ def onAppStart(app):  # type: ignore
     app.startButton = {"size": 1, "cx": app.width // 2, "cy": 3 * app.height / 4}
     app.state = "menu"
     app.stimuliRadius = 100
-    app.dots = generateDotVelocities(app, 0.5, 50, dir=-1, vel=20)
+    dir = np.random.choice([-1, 1])
+    app.dots = generateDotVelocities(app, 0.9, 50, dir=dir, vel=10)
     app.gaze = None
     app.ratio = 0
     app.stepsPerSecond = 30
@@ -24,6 +25,8 @@ def onAppStart(app):  # type: ignore
     app.calibrationFrames = 0
     app.finalCalibratedPositions = []
     app.integratedInformation = []
+    app.decisions = []
+
     app.decision = None
     pass
 
@@ -71,6 +74,14 @@ def generateDotVelocities(app, coherence, numDots, dir=1, vel=1):
 
 def redrawAll(app):
 
+    if app.state == "debrief":
+        drawLabel(
+            f"You chose {app.decisions[-1]}",
+            app.width // 2,
+            app.startButton["cy"],
+            size=35 * app.startButton["size"],
+            align="center",
+        )
     if app.state == "menu":
         drawRect(
             app.width // 2,
@@ -132,6 +143,12 @@ def overButton(button, mouseX, mouseY, width, height):
 
 
 def onStep(app):
+    if app.state == "debrief":
+        dir = np.random.choice([-1, 1])
+        app.dots = generateDotVelocities(app, 0.9, 50, dir=dir, vel=10)
+        time.sleep(1)
+        app.integratedInformation = []
+        app.state = "task"
     if app.state == "task":
         _, frame = webcam.read()
         gaze.refresh(frame)
@@ -148,15 +165,16 @@ def onStep(app):
         else:
             app.ratio = oldRatio
         ################################################################
-        if len(app.integratedInformation) >= 5:
+        if len(app.integratedInformation) >= 10:
             avg = np.mean(app.integratedInformation)
             if avg <= app.width // 8:
                 app.decision = "left"
             elif avg >= app.width * 7 // 8:
                 app.decision = "right"
             if app.decision is not None:
-                print(app.decision)
-                app.state = "menu"
+                app.decisions.append(app.decision)
+                app.decision = None
+                app.state = "debrief"
         ################################################################
         if gaze.is_center():
             app.gaze = "center"
