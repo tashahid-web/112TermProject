@@ -5,8 +5,8 @@
 
 import numpy as np
 
-COHERENCES = [0.1, 0.9]  # fmt: off
-TRIALSPERCOHERENCE = 6
+COHERENCES = [0, 0.01, 0.1, 0.2, 0.5, 0.8]  # fmt: off
+TRIALSPERCOHERENCE = 1
 
 
 def generateTrials():
