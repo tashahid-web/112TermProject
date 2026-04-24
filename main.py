@@ -152,9 +152,9 @@ def redrawAll(app):
 
     if app.substate == "decision":
         drawLabel(
-            "O",
+            ".",
             app.ratio,
-            app.height / 4,
+            app.height / 2,
             bold=True,
             size=50,
             fill="red",
