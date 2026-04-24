@@ -23,7 +23,7 @@ def generateTrials():
 
 def generateTutorialTrials():
     trialCoherences = []
-    for coherence in [-0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3]:
+    for coherence in [0, 0.2, 0.4, 0.9]:
         trialCoherences.extend([coherence] * 2)
     np.random.shuffle(trialCoherences)
 
@@ -49,7 +49,7 @@ def getDecision(app):
         if avg <= app.width // 6:
             decision = "left"
             correct = True if app.currDir == -1 else False
-        elif avg >= app.width * 4 // 6:
+        elif avg >= app.width * 5 // 6:
             decision = "right"
             correct = True if app.currDir == 1 else False
         else:
