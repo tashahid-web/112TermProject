@@ -5,14 +5,14 @@
 
 import numpy as np
 
-COHERENCES = [-0.3, -0.25, -0.2, -0.15, -.1, -.05, 0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.30]  # fmt: off
+COHERENCES = [0.1, 0.9]  # fmt: off
 TRIALSPERCOHERENCE = 6
 
 
 def generateTrials():
     trialCoherences = []
     for coherence in COHERENCES:
-        trialCoherences.extend([coherence] * TRIALSPERCOHERENCE)
+        trialCoherences.extend([coherence] * TRIALSPERCOHERENCE * 2)
     np.random.shuffle(trialCoherences)
 
     trialDirs = [np.random.choice([-1, 1]) for _ in range(len(trialCoherences))]
@@ -31,3 +31,28 @@ def generateTutorialTrials():
 
     trials = {"coherences": trialCoherences, "dirs": trialDirs}
     return trials
+
+
+def transformRatio(app, horizontalRatio):
+    horizontalRatio = 1 - horizontalRatio
+    transformedRatio = (
+        (horizontalRatio - app.finalCalibratedPositions[0])
+        / (app.finalCalibratedPositions[2] - app.finalCalibratedPositions[0])
+        * app.width
+    )
+    return transformedRatio
+
+
+def getDecision(app):
+    if len(app.integratedInformation) >= 5:
+        avg = np.mean(app.integratedInformation[-10:])
+        if avg <= app.width // 6:
+            decision = "left"
+            correct = True if app.currDir == -1 else False
+        elif avg >= app.width * 4 // 6:
+            decision = "right"
+            correct = True if app.currDir == 1 else False
+        else:
+            return None, None
+        return decision, correct
+    return None, None
