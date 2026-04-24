@@ -1,13 +1,24 @@
-import numpy as np
 from cmu_graphics import *
-from dots import updateDots, generateDots
 import cv2
 from gaze_tracking import GazeTracking
+from dots import updateDots, generateDots
+from utils import generateTrials, generateTutorialTrials
 
 """
 Rather than using screens, use strings for app.state:
 
 "menu"
+"instructions"
+"tutorialTask"
+    "fix"
+    "stimulus"
+    "decision"
+    "debrief"
+"task"
+    "fix"
+    "stimulus"
+    "decision"
+    "debrief"
 
 """
 
@@ -18,11 +29,17 @@ webcam = cv2.VideoCapture(1)
 def onAppStart(app):
     app.velocity = 50
     app.stimuliRadius = 300
-    dir = np.random.choice([-1, 1])
-    app.dots = generateDots(app, 0.4, dir=dir, vel=app.velocity)
+    # dir = np.random.choice([-1, 1])
+    dir = 1
+    app.dots = generateDots(app, 0.3, dir=dir, vel=app.velocity)
+    app.trials = generateTrials()
+    app.tutorialTrials = generateTutorialTrials()
 
 
 def redrawAll(app):
+
+    if app.state == "":
+        pass
     drawDots(app)
 
 
@@ -39,4 +56,3 @@ def onStep(app):
 
 
 runApp(width=1600, height=1000)
-# cmu_graphics.run()
