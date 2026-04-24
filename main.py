@@ -1,5 +1,7 @@
 # ruff: noqa
 # type: ignore
+
+TESTCOHERENCE = 0.01
 import numpy as np
 from cmu_graphics import *
 import cv2
@@ -15,7 +17,8 @@ def onAppStart(app):  # type: ignore
     app.state = "menu"
     app.stimuliRadius = 100
     dir = np.random.choice([-1, 1])
-    app.dots = generateDotVelocities(app, 0.9, 50, dir=dir, vel=10)
+    app.currentDots = {"coherence": 1, "dir": dir}
+    app.dots = generateDotVelocities(app, 1, 50, dir=dir, vel=10)
     app.gaze = None
     app.ratio = 0
     app.stepsPerSecond = 30
@@ -45,7 +48,12 @@ def generatePosition(stimuliRadius):
     return [x, y]
 
 
-def generateDotVelocities(app, coherence, numDots, dir=1, vel=1):
+def generateAllTrialInformation(coherences=[0, 20, 40], trialsPerCoherence=20):
+    # coherence is a decimal
+    pass
+
+
+def generateDotVelocities(app, coherence, numDots=50, dir=1, vel=1):
     stimuliRadius = app.stimuliRadius
     numCoherent = int(coherence * numDots)
     numRand = numDots - numCoherent
@@ -76,7 +84,7 @@ def redrawAll(app):
 
     if app.state == "debrief":
         drawLabel(
-            f"You chose {app.decisions[-1]}",
+            f"You chose {app.decisions[-1]}, correct={app.correct}",
             app.width // 2,
             app.startButton["cy"],
             size=35 * app.startButton["size"],
@@ -145,7 +153,8 @@ def overButton(button, mouseX, mouseY, width, height):
 def onStep(app):
     if app.state == "debrief":
         dir = np.random.choice([-1, 1])
-        app.dots = generateDotVelocities(app, 0.9, 50, dir=dir, vel=10)
+        app.currentDots = {"coherence": TESTCOHERENCE, "dir": dir}
+        app.dots = generateDotVelocities(app, TESTCOHERENCE, 50, dir=dir, vel=10)
         time.sleep(1)
         app.integratedInformation = []
         app.state = "task"
@@ -165,12 +174,14 @@ def onStep(app):
         else:
             app.ratio = oldRatio
         ################################################################
-        if len(app.integratedInformation) >= 10:
-            avg = np.mean(app.integratedInformation)
-            if avg <= app.width // 8:
+        if len(app.integratedInformation) >= 5:
+            avg = np.mean(app.integratedInformation[-10:])
+            if avg <= app.width // 6:
                 app.decision = "left"
-            elif avg >= app.width * 7 // 8:
+                app.correct = True if app.currentDots["dir"] == -1 else False
+            elif avg >= app.width * 4 // 6:
                 app.decision = "right"
+                app.correct = True if app.currentDots["dir"] == 1 else False
             if app.decision is not None:
                 app.decisions.append(app.decision)
                 app.decision = None
